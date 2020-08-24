@@ -1,4 +1,4 @@
 # Heyao_Python
-heyao根据自己常用的一些方法编写的函数或者类
-以便于后续快速开发
-不足之处请给位指正
+some function or class write by heyao.
+if you have good idea,please join my team.
+thank you.
