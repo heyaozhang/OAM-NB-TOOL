@@ -1,9 +1,11 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
 
 allfile = []
 def get_all_file(path):
     allfilelist = os.listdir(path)
     for file in allfilelist:
-        filepath = os.path.join(path, file)
+        filepath = os.path.join(path,file)
         # 判断是否是文件夹
         if os.path.isdir(filepath):
             get_all_file(filepath)
