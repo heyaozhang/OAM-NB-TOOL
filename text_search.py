@@ -35,4 +35,5 @@ def text_search(start,end,file_list):
 
 if __name__ == '__main__':
     f = list(open(r'test\text_search_ceshi.txt','r'))
-    print(text_search('[heyao@localhost ~]$ ifconfig','[heyao@localhost ~]',f))    
+    for each in text_search('[heyao@localhost ~]$ ifconfig','[heyao@localhost ~]',f):
+        print(each)
