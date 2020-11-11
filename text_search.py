@@ -16,13 +16,14 @@ def text_search(start,end,file_list):
             start在file_list中唯一并存在
             end为从start开始至结尾匹配到的第一个标识字符串
             如果end没匹配到，则一直到file_list末尾
-    """    
+    """
     for each in file_list:
         if start in each:
             a = file_list.index(each)
             break
-        else:
-            print('起始标识start不存在')
+    a_exists = 'a' in locals()
+    if not a_exists:        
+        raise UnboundLocalError('起始标识start不存在，请核查起始文本是否正确！')
     for each in file_list[a+1:]:
         if end in each:
             b = file_list[a+1:].index(each) + 1
@@ -35,5 +36,7 @@ def text_search(start,end,file_list):
 
 if __name__ == '__main__':
     f = list(open(r'test\text_search_ceshi.txt','r'))
-    for each in text_search('[heyao@localhost ~]$ ifconfig','[heyao@localhost ~]',f):
+    for each in text_search('xxxxx','[heyao@localhost ~]',f):
         print(each)
+
+        #[heyao@localhost ~]$ ifconfig
