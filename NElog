@@ -1,0 +1,56 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+
+# 注意该脚本只适用于linux系统
+# 因pexpect非python自带模块，需将该模块也传到当前目录
+# pexpect依赖ptyprocess模块，需将该模块也传到当前目录
+# 脚本功能：登陆到节点执行指令并将日志进行存储
+
+import os
+import sys
+sys.path.append(os.getcwd()+'/pexpect-4.6.0')
+sys.path.append(os.getcwd()+'/ptyprocess-0.6.0')
+import pexpect
+
+
+class ConNE:
+    # 需要将网元名、Ip、用户名、密码按序传入
+    def __init__(self,NodeName,NodeIp,UserName,Passwd):
+        self.NodeName = NodeName
+        self.NodeIp = NodeIp
+        self.UserName = UserName
+        self.Passwd = Passwd
+    
+            
+    # 需要将日志存储目录、网元起始回显按序传入
+    def ssh_NE(self,path,startecho):
+        self.path = path
+        self.startecho = startecho
+        try:
+            with open(self.path + '/' + self.NodeName +'.log','w') as fa:
+                process = pexpect.spawn('ssh %s@%s' % (self.UserName,self.NodeIp),timeout=120,maxread=200000000)
+                process.setwinsize(100,240)
+                process.logfile_read = fa            
+                flag = process.expect(['assword: ', 'continue connecting (yes/no)?'],timeout=5)
+                if flag == 0:
+                    process.sendline(self.Passwd)
+                else:
+                    process.sendline('yes')
+                    process.expect('assword: ')
+                    process.sendline(self.Passwd)
+                process.expect(self.startecho)
+                process.sendline('hostname')
+                process.expect(self.startecho)
+                process.sendline('exit')
+                process.expect(pexpect.EOF)
+        except Exception as reason:
+            print(reason)
+        finally:
+            process.close()
+
+if __name__ = '__main__':
+    con = ConNE('Ubuntu','192.168.137.2','root','rootroot')
+    con.ssh_NE('/root/zhy','# ')
+
+            
+    
