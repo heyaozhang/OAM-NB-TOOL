@@ -5,12 +5,15 @@
 # 因pexpect非python自带模块，需将该模块也传到当前目录
 # pexpect依赖ptyprocess模块，需将该模块也传到当前目录
 # 脚本功能：登陆到节点执行指令并将日志进行存储
+# 适配pyton2/python3的print语法
 
 import os
 import sys
 sys.path.append(os.getcwd()+'/pexpect-4.6.0')
 sys.path.append(os.getcwd()+'/ptyprocess-0.6.0')
 import pexpect
+import platform
+import re
 
 
 class ConNE:
@@ -31,9 +34,13 @@ class ConNE:
         self.cmdset = cmdset
         try:
             with open(self.path + '/' + self.NodeName +'.log','w') as fa:
-                process = pexpect.spawn('ssh %s@%s' % (self.UserName,self.NodeIp),timeout=120)
-                process.setwinsize(100,240)
-                process.logfile_read = fa            
+                if re.match(r'2\.\d*\.\d*',platform.python_version()):
+                    print'开始登陆网元'
+                else:
+                    print('开始登陆网元')                
+                process = pexpect.spawn('ssh %s@%s' % (self.UserName,self.NodeIp),timeout=60,searchwindowsize=100)
+                process.setwinsize(100,240)                
+                process.logfile_read = fa
                 flag = process.expect(['assword: ', 'continue connecting (yes/no)?'],timeout=5)
                 if flag == 0:
                     process.sendline(self.Passwd)
@@ -47,9 +54,12 @@ class ConNE:
                     process.expect(self.startecho)                    
                 process.sendline('exit')
                 process.expect(pexpect.EOF)
- 
+      
         except Exception as reason:
-            print(reason)
+            if re.match(r'2\.\d*\.\d*',platform.python_version()):
+                print reason
+            else:
+                print(reason)
         finally:
             process.close()
 
