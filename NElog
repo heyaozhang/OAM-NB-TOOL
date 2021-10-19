@@ -22,13 +22,16 @@ class ConNE:
         self.Passwd = Passwd
     
             
-    # 需要将日志存储目录、网元起始回显按序传入
-    def ssh_NE(self,path,startecho):
+    # 需要将日志存储目录、网元起始回显、指令集合按序传入
+    # 此方法用于默认22端口ssh连接
+    # 日志以网元名进行命名
+    def ssh_NE(self,path,startecho,cmdset):
         self.path = path
         self.startecho = startecho
+        self.cmdset = cmdset
         try:
             with open(self.path + '/' + self.NodeName +'.log','w') as fa:
-                process = pexpect.spawn('ssh %s@%s' % (self.UserName,self.NodeIp),timeout=120,maxread=200000000)
+                process = pexpect.spawn('ssh %s@%s' % (self.UserName,self.NodeIp),timeout=120)
                 process.setwinsize(100,240)
                 process.logfile_read = fa            
                 flag = process.expect(['assword: ', 'continue connecting (yes/no)?'],timeout=5)
@@ -39,10 +42,12 @@ class ConNE:
                     process.expect('assword: ')
                     process.sendline(self.Passwd)
                 process.expect(self.startecho)
-                process.sendline('hostname')
-                process.expect(self.startecho)
+                for cmd in self.cmdset:
+                    process.sendline(cmd)
+                    process.expect(self.startecho)                    
                 process.sendline('exit')
                 process.expect(pexpect.EOF)
+ 
         except Exception as reason:
             print(reason)
         finally:
@@ -50,7 +55,5 @@ class ConNE:
 
 if __name__ = '__main__':
     con = ConNE('Ubuntu','192.168.137.2','root','rootroot')
-    con.ssh_NE('/root/zhy','# ')
-
-            
-    
+    cmdset = ['hostname','ls -l','pwd']
+    con.ssh_NE('/root/zhy','# ',cmdset)
