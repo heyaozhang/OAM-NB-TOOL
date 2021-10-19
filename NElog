@@ -35,9 +35,9 @@ class ConNE:
         try:
             with open(self.path + '/' + self.NodeName +'.log','w') as fa:
                 if re.match(r'2\.\d*\.\d*',platform.python_version()):
-                    print'开始登陆网元'
+                    print'开始登陆网元%s' % self.NodeName
                 else:
-                    print('开始登陆网元')                
+                    print('开始登陆网元%s' % self.NodeName)                
                 process = pexpect.spawn('ssh %s@%s' % (self.UserName,self.NodeIp),timeout=60,searchwindowsize=100)
                 process.setwinsize(100,240)                
                 process.logfile_read = fa
