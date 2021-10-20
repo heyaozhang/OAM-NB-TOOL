@@ -6,6 +6,7 @@
 # pexpect依赖ptyprocess模块，需将该模块也传到当前目录
 # 脚本功能：登陆到节点执行指令并将日志进行存储
 # 适配pyton2/python3的print语法
+# 多线程登陆网元，并行执行指令，需手动设定线程数
 
 import os
 import sys
@@ -14,6 +15,7 @@ sys.path.append(os.getcwd()+'/ptyprocess-0.6.0')
 import pexpect
 import platform
 import re
+import threading,time
 
 
 class ConNE:
@@ -37,7 +39,7 @@ class ConNE:
                 if re.match(r'2\.\d*\.\d*',platform.python_version()):
                     print'开始登陆网元%s' % self.NodeName
                 else:
-                    print('开始登陆网元%s' % self.NodeName)                
+                    print('开始登陆网元%s' % self.NodeName)                 
                 process = pexpect.spawn('ssh %s@%s' % (self.UserName,self.NodeIp),timeout=60,searchwindowsize=100)
                 process.setwinsize(100,240)                
                 process.logfile_read = fa
@@ -63,7 +65,52 @@ class ConNE:
         finally:
             process.close()
 
-if __name__ = '__main__':
-    con = ConNE('Ubuntu','192.168.137.2','root','rootroot')
+
+# originalist为网元初始列表，ThreadNum为指定线程数
+class SplitThread:
+    def Thread(self,originalist,ThreadNum):
+        self.originalist = originalist
+        self.ThreadNum = ThreadNum
+        i = 0
+        SplitList = []
+        while True:
+            if i+self.ThreadNum < len(self.originalist):
+                SplitList.append((self.originalist[i:i+self.ThreadNum]))
+            else:
+                SplitList.append((self.originalist[i:]))
+                break
+            i += self.ThreadNum
+        return SplitList
+
+if __name__ == '__main__':
+    NEinfo = [('Node1','192.168.193.2','root','rootroot'),
+              ('Node2','192.168.193.3','root','rootroot'),
+              ('Node3','192.168.193.4','root','rootroot'),
+              ('Node4','192.168.193.5','root','rootroot')
+              ]
+    
     cmdset = ['hostname','ls -l','pwd']
-    con.ssh_NE('/root/zhy','# ',cmdset)
+    
+    SThread = SplitThread()
+    SubNEinfo = SThread.Thread(NEinfo,4)
+    
+
+    for SubNE in SubNEinfo:
+        t_obj=[]
+        start_time=time.time()
+        for NE in SubNE:
+            con = ConNE(NE[0],NE[1],NE[2],NE[3])
+            t=threading.Thread(target=con.ssh_NE,args=('/root/zhy','# ',cmdset))
+            t_obj.append(t)
+            t.start()
+        
+        for t in t_obj:
+            t.join()
+
+        if re.match(r'2\.\d*\.\d*',platform.python_version()):
+            print time.time()-start_time
+        else:
+            print(time.time()-start_time)
+
+            
+
