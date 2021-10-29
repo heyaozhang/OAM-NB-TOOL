@@ -1,0 +1,26 @@
+import matplotlib.pyplot as plt
+
+import numpy as np
+import math
+
+# 获得0到2π之间的ndarray对象，获取x值
+x = np.arange(0, math.pi*2, 0.05)
+
+# 获取y值
+y = np.sin(x)
+
+# 使用 plot() 函数对 x、y 进行绘制
+plt.plot(x,y)
+
+
+# 设置x轴标签
+plt.xlabel("angel")
+
+# 设置y轴标签
+plt.ylabel("sine")
+
+# 设置图像的标题
+plt.title("sine wave")
+
+# 使用show展示图像
+plt.show()
